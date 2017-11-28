@@ -95,7 +95,7 @@ humbProt.addTopping = (topping) => {
      * Узнать калорийность
      * @return {Number} Калорийность в калориях
      */
-    Hamburger.prototype.calculateCalories = () => humbProt.typeOfHumburger.calories + humbProt.stuffing.calories + humbProt.calculateCaloriesOfTopping();
+    humbProt.calculateCalories = () => humbProt.typeOfHumburger.calories + humbProt.stuffing.calories + humbProt.calculateCaloriesOfTopping();
 
     /**
      * Представляет информацию об ошибке в ходе работы с гамбургером.
@@ -109,13 +109,25 @@ humbProt.addTopping = (topping) => {
 
         console.log(`${this.name}: ${this.message}`);
     }
+    // HamburgerException.prototype.toString = () => `${this.name}: ${this.message}`;
 
-
+/**
+ * Проверяет наличие добавки в гамбургере
+ * @param element
+ * @param arrayOfElements
+ */
 humbProt.isExist = (element, arrayOfElements) =>  arrayOfElements.find((currentElement, index, arrayOfElements) => element === currentElement);
 
+/**
+ * Проверяет есть ли какие-нибудь добавоки
+ * @param arrayOfElements
+ */
 humbProt.isEmpty = (arrayOfElements) =>  !!arrayOfElements.length;
 
-
+/**
+ * Подсчет цены добавок
+ * @returns {number}
+ */
 humbProt.calculatePriceOfTopping = () =>{
 
     let totalPrice = 0;
@@ -127,6 +139,10 @@ humbProt.calculatePriceOfTopping = () =>{
     return totalPrice;
 };
 
+/**
+ * Подсчет каллорий добавок
+ * @returns {number}
+ */
 humbProt.calculateCaloriesOfTopping = () =>{
 
     let totalCalories = 0;
