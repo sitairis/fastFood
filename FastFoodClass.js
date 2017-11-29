@@ -98,15 +98,6 @@ class Hamburger{
     }
 
     /**
-     * Проверяет есть ли какие-нибудь добавоки
-     * @returns {boolean}
-     * @param toppings
-     */
-    static isEmpty(toppings) {
-        return !!toppings.length;
-    }
-
-    /**
      * Подсчет цены добавок
      * @returns {number}
      */
