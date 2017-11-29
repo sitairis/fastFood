@@ -9,10 +9,10 @@
 function Hamburger(sizeOfHamburger, stuffing) {
 
     if (!sizeOfHamburger && !stuffing)
-       new HamburgerException(`no size or stuffing given`);
+       throw new HamburgerException(`no size or stuffing given`);
 
     if (sizeOfHamburger !==  Hamburger.SIZE_SMALL && sizeOfHamburger !== Hamburger.SIZE_LARGE)
-        new HamburgerException(`invalid size`);
+        throw new HamburgerException(`invalid size`);
 
     Hamburger.prototype.typeOfHumburger = {...sizeOfHamburger};
     Hamburger.prototype.stuffing = {...stuffing};
@@ -41,10 +41,10 @@ Hamburger.TOPPING_SPICE = { topping:'TOPPING_SPICE', price:15, calories:0};
 humbProt.addTopping = (topping) => {
 
     if (!topping)
-        new HamburgerException(`no topping given`);
+        throw new HamburgerException(`no topping given`);
 
     if (humbProt.isExist(topping, humbProt.topping))
-        new HamburgerException(`duplicate topping '${topping.topping}'`);
+        throw new HamburgerException(`duplicate topping '${topping.topping}'`);
 
     humbProt.topping.push(topping);
 };
@@ -59,10 +59,10 @@ humbProt.addTopping = (topping) => {
     humbProt.removeTopping = (topping) => {
 
         if (!topping)
-            new HamburgerException(`no topping given`);
+            throw new HamburgerException(`no topping given`);
 
         if (!humbProt.isExist(topping, humbProt.topping))
-            new HamburgerException(`there is no topping '${topping.topping}'`);
+            throw new HamburgerException(`there is no topping '${topping.topping}'`);
 
         humbProt.topping.splice(humbProt.topping.indexOf(topping), 1);
     };
@@ -102,14 +102,20 @@ humbProt.addTopping = (topping) => {
      * Подробности хранятся в свойстве message.
      * @constructor
      */
-    function HamburgerException (message) {
+    function HamburgerException(message) {
 
-        this.name = 'HamburgerException';
+        this.name = "PropertyError";
         this.message = message;
 
-        console.log(`${this.name}: ${this.message}`);
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, this.constructor);
+        } else {
+            this.stack = (new Error()).stack;
+        }
     }
-    // HamburgerException.prototype.toString = () => `${this.name}: ${this.message}`;
+
+    HamburgerException.prototype = Object.create(Error.prototype);
+    HamburgerException.prototype.constructor = HamburgerException;
 
 /**
  * Проверяет наличие добавки в гамбургере
@@ -154,44 +160,53 @@ humbProt.calculateCaloriesOfTopping = () =>{
     return totalCalories;
 };
 
+
+try {
 // маленький гамбургер с начинкой из сыра
-let hamburger = new Hamburger(Hamburger.SIZE_SMALL, Hamburger.STUFFING_CHEESE);
+    let hamburger = new Hamburger(Hamburger.SIZE_SMALL, Hamburger.STUFFING_CHEESE);
 
 // добавка из майонеза
-hamburger.addTopping(Hamburger.TOPPING_MAYO);
+    hamburger.addTopping(Hamburger.TOPPING_MAYO);
 
 // спросим сколько там калорий
-console.log(`Calories: ${hamburger.calculateCalories()}`);
+    console.log(`Calories: ${hamburger.calculateCalories()}`);
 
 // сколько стоит
-console.log(`Price: ${hamburger.calculatePrice()}`);
+    console.log(`Price: ${hamburger.calculatePrice()}`);
 
 // я тут передумал и решил добавить еще приправу
-hamburger.addTopping(Hamburger.TOPPING_SPICE);
+    hamburger.addTopping(Hamburger.TOPPING_SPICE);
 
 // А сколько теперь стоит?
-console.log(`Price with sauce: ${hamburger.calculatePrice()}`);
+    console.log(`Price with sauce: ${hamburger.calculatePrice()}`);
 
 // Проверить, большой ли гамбургер?
-console.log(`Is hamburger large: ${hamburger.getSize() === Hamburger.SIZE_LARGE}`); // -> false
+    console.log(`Is hamburger large: ${hamburger.getSize() === Hamburger.SIZE_LARGE}`); // -> false
 
 // Убрать добавку
-hamburger.removeTopping(Hamburger.TOPPING_SPICE);
+    hamburger.removeTopping(Hamburger.TOPPING_SPICE);
 
 //сколько добавок
-console.log(`Have ${hamburger.getToppings().length} toppings`); // 1
+    console.log(`Have ${hamburger.getToppings().length} toppings`); // 1
 
 
 // не передали обязательные параметры
-let h2 = new Hamburger(); // => HamburgerException: no size given
+//     let h2 = new Hamburger(); // => HamburgerException: no size given
 
 // передаем некорректные значения, добавку вместо размера
-let h3 = new Hamburger(Hamburger.TOPPING_SPICE, Hamburger.TOPPING_SPICE);
+//     let h3 = new Hamburger(Hamburger.TOPPING_SPICE, Hamburger.TOPPING_SPICE);
 // => HamburgerException: invalid size 'TOPPING_SAUCE'
 
 // добавляем много добавок
-let h4 = new Hamburger(Hamburger.SIZE_SMALL, Hamburger.STUFFING_CHEESE);
+    let h4 = new Hamburger(Hamburger.SIZE_SMALL, Hamburger.STUFFING_CHEESE);
 
-h4.addTopping(Hamburger.TOPPING_MAYO);
-h4.addTopping(Hamburger.TOPPING_MAYO);
+    // h4.addTopping(Hamburger.TOPPING_MAYO);
+    // h4.addTopping(Hamburger.TOPPING_MAYO);
 // HamburgerException: duplicate topping 'TOPPING_MAYO'
+}catch (exception) {
+    if (exception instanceof HamburgerException) {
+        console.log(exception.message);
+    } else {
+        throw exception; // неизвестная ошибка, не знаю что с ней делать
+    }
+}
